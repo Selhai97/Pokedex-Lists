@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1 id="pokedexTitle">My Pokedex</h1>
+        <input type="text" id="pokedexNameInput" placeholder="Enter Pokedex Name">
+        <button id="createButton">Create New Pokedex</button>
+        <button id="deleteButton">Delete Pokedex</button>
+        <select id="pokedexSelect">
+            <!-- Pokedex options will be dynamically added here -->
+        </select>
+    </header>
+    <main>
+        <section id="pokedex">
+            <!-- Pokemon cards will be dynamically added here -->
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Pokedex Tracker</p>
+    </footer>
+    <script src="indexdb.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

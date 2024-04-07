@@ -156,6 +156,7 @@ function createPokemonCard(parent, pokemonName, pokemonData) {
                     if (selectedPokedex.data[pokemonName]) {
                         selectedPokedex.data[pokemonName].caught = !selectedPokedex.data[pokemonName].caught;
                         localStorage.setItem('pokedexes', JSON.stringify(savedPokedexes));
+                        console.log(selectedPokedex.data[pokemonName].caught)
                         updateCaughtState(selectedPokedexName, pokemonName, selectedPokedex.data[pokemonName].caught);
                     } else {
                         console.error('Error: Pokemon data not found in the selected Pokedex.');

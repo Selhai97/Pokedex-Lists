@@ -94,38 +94,38 @@ async function savePokedex(pokedexName, pokemonData) {
     }
 }
 
-async function updateCaughtState(pokemonName, isCaught) {
+async function updateCaughtState(selectedPokedexName, pokemonName, isCaught) {
     try {
         // Open IndexedDB database
         const db = await openDatabase();
         const transaction = db.transaction(['pokedexes'], 'readwrite');
         const store = transaction.objectStore('pokedexes');
-        
-        // Retrieve the Pokedex from IndexedDB
-        const request = store.getAll();
-        
-        request.onsuccess = (event) => {
-            const savedPokedexes = event.target.result;
-            // Ensure savedPokedexes is an array
-            if (Array.isArray(savedPokedexes)) {
-                savedPokedexes.forEach(async (pokedexObject) => {
-                    // Check if the Pokemon exists in the current Pokedex
-                    if (pokedexObject.data.hasOwnProperty(pokemonName)) {
-                        // Update the caught state of the Pokemon
-                        pokedexObject.data[pokemonName].caught = isCaught;
 
-                        // Save the updated Pokedex back to IndexedDB
-                        await store.put(pokedexObject);
-                    }
-                });
+        // Retrieve the selected Pokedex from IndexedDB
+        const request = store.get(selectedPokedexName);
+
+        request.onsuccess = (event) => {
+            const selectedPokedex = event.target.result;
+            if (selectedPokedex) {
+                // Check if the Pokemon exists in the selected Pokedex
+                if (selectedPokedex.data.hasOwnProperty(pokemonName)) {
+                    // Update the caught state of the Pokemon
+                    selectedPokedex.data[pokemonName].caught = isCaught;
+
+                    // Save the updated selected Pokedex back to IndexedDB
+                    store.put(selectedPokedex);
+                } else {
+                    console.error('Error: Pokemon not found in the selected Pokedex.');
+                }
             } else {
-                console.error('Error: Saved Pokedexes is not an array.');
+                console.error('Error: Selected Pokedex not found.');
             }
         };
     } catch (error) {
         console.error('Error updating caught state:', error);
     }
 }
+
 
 // Function to delete a Pokedex from IndexedDB
 async function deletePokedexFromIndexedDB(pokedexName) {

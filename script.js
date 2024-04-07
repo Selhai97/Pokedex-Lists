@@ -9,7 +9,6 @@ async function loadPokemonData() {
     }
 }
 
-
 // Function to load saved Pokedexes from IndexedDB
 async function loadSavedPokedexesFromIndexedDB() {
     try {
@@ -182,8 +181,9 @@ function displayPokedexData(data) {
     const pokedexSection = document.getElementById('pokedex');
     pokedexSection.innerHTML = '';
     
+    // Loop through each Pokemon in the data and create a card for each one
     Object.keys(data).forEach(pokemonName => {
-        createPokemonCard(pokedexSection, data[pokemonName].name.english, data[pokemonName]);
+        createPokemonCard(pokedexSection, pokemonName, data[pokemonName]);
     });
 }
 
@@ -210,6 +210,7 @@ async function displaySelectedPokedex() {
 
     // Update the title of the displayed Pokedex
     document.getElementById('pokedexTitle').textContent = selectedPokedexName;
+    console.log('pokedex name: ' + selectedPokedexName)
 
     try {
         // Load saved Pokedexes

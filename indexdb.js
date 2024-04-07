@@ -61,6 +61,7 @@ async function displaySavedPokedexes() {
     // Further processing or display of saved Pokedexes
 }
 
+// Function to save the Pokedex data to IndexedDB
 async function savePokedex(pokedexName, pokemonData) {
     try {
         // Open IndexedDB database
@@ -74,12 +75,17 @@ async function savePokedex(pokedexName, pokemonData) {
             const pokedexObject = { name: pokedexName, data: {} };
             pokemonData.forEach(pokemon => {
                 // Include caught state in each Pokemon object
-                pokedexObject.data[pokemon.name] = { ...pokemon, caught: false }; // Store each Pokemon object by its name
+                pokedexObject.data[pokemon.name.english] = { ...pokemon, caught: false }; // Store each Pokemon object by its name
             });
 
             // Save the updated Pokedex object to IndexedDB
-            store.put(pokedexObject);
-            console.log('Pokedex saved to IndexedDB:', pokedexName);
+            const request = store.add(pokedexObject);
+            request.onsuccess = () => {
+                console.log('Pokedex saved to IndexedDB:', pokedexName);
+            };
+            request.onerror = (event) => {
+                console.error('Error saving Pokedex:', event.target.error);
+            };
         } else {
             console.error('Error: Pokemon data is not in the expected format.');
         }
@@ -90,28 +96,32 @@ async function savePokedex(pokedexName, pokemonData) {
 
 async function updateCaughtState(pokemonName, isCaught) {
     try {
-        // Load saved Pokedexes
-        const savedPokedexes = await getSavedPokedexes();
+        // Open IndexedDB database
+        const db = await openDatabase();
+        const transaction = db.transaction(['pokedexes'], 'readwrite');
+        const store = transaction.objectStore('pokedexes');
         
-        // Ensure savedPokedexes is an array
-        if (Array.isArray(savedPokedexes)) {
-            // Iterate over each saved Pokedex
-            for (const pokedex of savedPokedexes) {
-                // Check if the Pokemon exists in the current Pokedex
-                if (pokedex.data.hasOwnProperty(pokemonName)) {
-                    // Update the caught state of the Pokemon
-                    pokedex.data[pokemonName].caught = isCaught;
+        // Retrieve the Pokedex from IndexedDB
+        const request = store.getAll();
+        
+        request.onsuccess = (event) => {
+            const savedPokedexes = event.target.result;
+            // Ensure savedPokedexes is an array
+            if (Array.isArray(savedPokedexes)) {
+                savedPokedexes.forEach(async (pokedexObject) => {
+                    // Check if the Pokemon exists in the current Pokedex
+                    if (pokedexObject.data.hasOwnProperty(pokemonName)) {
+                        // Update the caught state of the Pokemon
+                        pokedexObject.data[pokemonName].caught = isCaught;
 
-                    // Convert data to array format for saving
-                    const dataArray = Object.values(pokedex.data);
-
-                    // Save the updated Pokedex back to IndexedDB
-                    await savePokedex(pokedex.name, dataArray);
-                }
+                        // Save the updated Pokedex back to IndexedDB
+                        await store.put(pokedexObject);
+                    }
+                });
+            } else {
+                console.error('Error: Saved Pokedexes is not an array.');
             }
-        } else {
-            console.error('Error: Saved Pokedexes is not an array.');
-        }
+        };
     } catch (error) {
         console.error('Error updating caught state:', error);
     }
